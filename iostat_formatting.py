@@ -1,6 +1,6 @@
 # Server-bottleneck
 #
-# Scripts for formatting data from iostat command output to csv format.
+# Script for formatting data from iostat command output to csv format.
 # May be useful with linux-based performance analysis
 #
 # Author: Aleksei Kazancev
@@ -16,7 +16,7 @@ import re
 
 # regex for searching data by pattern
 digits_p = re.compile("([0-9]+,[0-9]+)")
-disk_p = re.compile("sd[a-z]")
+disk_p = re.compile("sd[a-z]|nvm[\\S]+")
 description_p = re.compile("(?<= )[a-zA-Z%_/-]+")
 
 flag_first_sec = True
@@ -29,13 +29,13 @@ with open("raw_data.log") as file:
         matched = []
         # Filling first line for description of columns
         if flag_first_sec:
-            if re.match("avg-cpu:", line):
-                matched.append("Num")
+            if re.match("avg-cpu", line):
+                matched.append("num")
                 for match in re.finditer(description_p, line):
                     matched.append(match.group())
                 s = delimiter.join(matched)
                 data.append(s)
-            if re.match("Device:", line):
+            if re.match("Device", line):
                 flag_first_sec = False
                 k = 0
                 for j, dLine in enumerate(open('raw_data.log')):
@@ -49,7 +49,7 @@ with open("raw_data.log") as file:
                         k += 1
                     elif k != 0:
                         break
-        if re.match("avg-cpu:", line):
+        if re.match("avg-cpu", line):
             flag_new_cpu = True
             continue
         if flag_new_cpu:
